@@ -2,95 +2,85 @@
 #include <stdlib.h>
 #include <string.h>
 
-char descricao[100][128];
-int prioridade[100];
-int status[100];
-int contador_tarefas = 0;
+int main(void) {
+    char descricoes[100][51];
+    int prioridades[100];
+    int status[100];
+    int total = 0;
+    int i, p, num, continuar;
+    char entrada[51];
 
-void print_menu() {
-    printf("= = = = Menu = = = =\n");
-    printf("1 - Cadastrar tarefa\n");
-    printf("2 - Listar tarefas\n");
-    printf("3 - Sair\n");
-}
+    printf("=== Cadastro de Tarefas ===\n");
+    printf("Digite \"fim\" como descricao para encerrar o cadastro.\n\n");
 
-void cadastrar_tarefa() {
-    if (contador_tarefas + 1 > 100) {
-        printf("Lista de tarefas cheia!\n");
-        return;
+    while (total < 100) {
+        printf("Descricao: ");
+        scanf(" %[^\n]", entrada);
+
+        if (strcmp(entrada, "fim") == 0) {
+            break;
+        }
+
+        strcpy(descricoes[total], entrada);
+        status[total] = 0;
+
+        do {
+            printf("Prioridade (1-5): ");
+            scanf("%d", &prioridades[total]);
+        } while (prioridades[total] < 1 || prioridades[total] > 5);
+
+        total++;
+        printf("\n");
     }
 
-    printf("Digite a descricao da tarefa (max 128 caracteres): ");
-    scanf(" %[^\n]", descricao[contador_tarefas]);
-
-    printf("Digite a prioridade da tarefa (1-5): ");
-    scanf("%d", &prioridade[contador_tarefas]);
-    do {
-        if (prioridade[contador_tarefas] < 1 || prioridade[contador_tarefas] > 5) {
-            printf("Prioridade invalida! Digite novamente (1-5): ");
-            scanf("%d", &prioridade[contador_tarefas]);
-        }
-    } while (prioridade[contador_tarefas] < 1 || prioridade[contador_tarefas] > 5);
-
-    printf("Digite o status da tarefa (0 [em andamento] - 1 [concluida]): ");
-    scanf("%d", &status[contador_tarefas]);
-    do {
-        if (status[contador_tarefas] < 0 || status[contador_tarefas] > 1) {
-            printf("Status invalido! Digite novamente (0 [em andamento] - 1 [concluida]): ");
-            scanf("%d", &status[contador_tarefas]);
-        }
-    } while (status[contador_tarefas] < 0 || status[contador_tarefas] > 1);
-
-    contador_tarefas++;
-    printf("\nTarefa cadastrada com sucesso!\n");
-    return;
-}
-
-void listar_tarefas() {
-    printf("Lista de tarefas:\n");
-    printf("Descricao - Prioridade - Status\n");
-    printf("--------------------\n");
-
-    if (contador_tarefas == 0) {
+    if (total == 0) {
         printf("Nenhuma tarefa cadastrada.\n");
-        printf("--------------------\n");
-        return;
+        return 0;
     }
 
-    char status_str[10];
-    for (int i = 0; i < contador_tarefas; i++) {
-        if (status[i] == 0) {
-            strcpy(status_str, "em andamento");
-        } else {
-            strcpy(status_str, "concluida");
-        }
-
-        printf("%s - %d - %s\n", descricao[i], prioridade[i], status_str);
+    printf("\n=== Tarefas cadastradas ===\n");
+    for (i = 0; i < total; i++) {
+        printf("%d. [ ] %s\n", i + 1, descricoes[i]);
     }
-    printf("--------------------\n");
-}
 
-int main() {
-    int opcao;
+    printf("\n=== Marcar tarefas concluidas ===\n");
+    printf("Digite o numero da tarefa para marcar como concluida (0 para encerrar):\n");
+
     do {
-        print_menu();
-        printf("Digite a opcao: ");
-        scanf("%d", &opcao);
-        switch (opcao) {
-            case 1:
-                cadastrar_tarefa();
-                break;
-            case 2:
-                listar_tarefas();
-                break;
-            case 3:
-                printf("Encerrando o programa.\n");
-                break;
-            default:
-                printf("Opcao invalida!\n");
-                break;
+        scanf("%d", &num);
+        if (num >= 1 && num <= total) {
+            status[num - 1] = 1;
+        } else if (num != 0) {
+            printf("Numero invalido. Tente novamente (0 para encerrar):\n");
         }
-    } while (opcao != 3);
+    } while (num != 0);
+
+    printf("\n=== Lista final de tarefas ===\n");
+    for (i = 0; i < total; i++) {
+        if (status[i] == 0) {
+            printf("%d. [ ] %s\n", i + 1, descricoes[i]);
+        }
+    }
+    for (i = 0; i < total; i++) {
+        if (status[i] == 1) {
+            printf("%d. [x] %s\n", i + 1, descricoes[i]);
+        }
+    }
+
+    printf("\n=== Tarefas pendentes por prioridade (5 a 1) ===\n");
+    continuar = 0;
+    for (p = 5; p >= 1; p--) {
+        for (i = 0; i < total; i++) {
+            if (status[i] == 0 && prioridades[i] == p) {
+                printf("%d. [ ] %s (prioridade %d)\n", i + 1, descricoes[i], p);
+                continuar = 1;
+            }
+        }
+    }
+
+    if (!continuar) {
+        printf("Nenhuma tarefa pendente.\n");
+    }
 
     return 0;
 }
